@@ -1,0 +1,46 @@
+%pylab inline
+def sense(x):
+    return x
+def simulate(Δt, x, u, m=1, g=9.8, f =9.0):
+    # Control input affects the acceleration
+    dx = array([x[3], x[4], x[5], u[0]/m, u[1]/m, u[2]/m])
+    # Include the gravity in the acceleration in z
+    dx[5] += - g + f/m
+
+    # Euler integration
+    x += Δt * dx
+
+    # Simulate the floor (Plastic colison)
+    if x[2] < 0:
+        x[2] = 0  # z = 0
+        x[5] = 0  # vz = 0
+
+    return x
+tf = 6.
+Δt = 0.1    # Time step
+time = linspace(0.,tf, int(tf / Δt) + 1)  # Time interval
+def control(t, y):
+    ux = 0
+    uy = 0
+    uz = 0  ### WRITE YOUR CONTROL POLICY HERE TO MAKE THE ROBOT FLY
+
+    return [ux, uy, uz]
+
+# Initial conditions
+x = array([0., 0., 10., 0.,0.,0.])
+x_log = [copy(x)]
+
+for t in time:
+    y = sense(x)
+    u = control(t, y)
+    x = simulate(Δt, x, u)
+    x_log.append(copy(x))
+x_log = array(x_log)
+
+fig, ax = plt.subplots()
+ax.plot(time, x_log[:-1,2])
+ax.set(title="Change in altitude with respect to time", xlabel="$Time $t$", ylabel="$Height $z$")
+ax.grid()
+
+
+# axes().set_ylabel("Time z")
